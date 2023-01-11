@@ -1,0 +1,18 @@
+# https://editorconfig.org
+root = true
+
+[*] # 모든 파일에 대해 적용
+charset = utf-8 # 문자 인코딩
+end_of_line = lf # 윈도우, 맥 줄 바꿈 통일
+indent_size = 2 # 들여쓰기
+indent_style = space # 들여쓰기 space or tab
+insert_final_newline = true # 파일 마지막에 공백줄 추가 여부
+max_line_length = 80 # 한 줄에 최대 글자수
+trim_trailing_whitespace = true # 뒤쪽의 공백 제거
+
+[*.md] # 마크다운에 대해서 적용
+max_line_length = 0
+trim_trailing_whitespace = false
+
+[COMMIT_EDITMSG] # 커밋 메시지에 대해서 적용
+max_line_length = 0
