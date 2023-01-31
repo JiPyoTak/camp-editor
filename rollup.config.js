@@ -21,6 +21,10 @@ export default [
       format: 'esm',
     },
     plugins: [
+      postcss({
+        module: true,
+        extract: true,
+      }),
       typescript({}),
       del({ targets: 'dist/*' }),
       alias({
@@ -29,8 +33,9 @@ export default [
     ],
   },
   {
-    input: 'src/editor.ts',
+    input: 'src/index.ts',
     output: [{ file: 'dist/index.d.ts', format: 'cjs' }],
+    external: [/\.css$/],
     plugins: [
       dts.default({}),
       alias({
@@ -39,16 +44,6 @@ export default [
       prettier({
         parser: 'babel-ts',
         tabWidth: 2,
-      }),
-    ],
-  },
-  {
-    input: 'src/assets/camp-editor.css',
-    output: [{ file: 'dist/index.css', name: 'style' }],
-    plugins: [
-      postcss({
-        module: true,
-        extract: true,
       }),
     ],
   },
