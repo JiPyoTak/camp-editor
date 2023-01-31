@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.path.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "es6",
+    "target": "es5",
+    "strict": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "allowJs": true,
+    "declaration": true
+  }
+}
