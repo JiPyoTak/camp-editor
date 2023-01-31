@@ -1,18 +1,18 @@
-const del = require("rollup-plugin-delete");
-const alias = require("@rollup/plugin-alias");
-const path = require("path");
-const typescript = require("rollup-plugin-typescript2");
-const dts = require("rollup-plugin-dts");
-const prettier = require("rollup-plugin-prettier");
+import path from "path";
+import del from "rollup-plugin-delete";
+import typescript from "rollup-plugin-typescript2";
+import dts from "rollup-plugin-dts";
+import prettier from "rollup-plugin-prettier";
+import alias from "@rollup/plugin-alias";
 
 const paths = [
   {
-    find: '@',
-    replacement: path.resolve(__dirname, 'src')
-  }
-]
+    find: "@",
+    replacement: path.resolve(__dirname, "src"),
+  },
+];
 
-module.exports = [
+export default [
   {
     input: "src/index.ts",
     output: {
@@ -20,23 +20,23 @@ module.exports = [
       format: "esm",
     },
     plugins: [
+      typescript(),
       del({ targets: "dist/*" }),
       alias({
         entries: paths,
       }),
-      typescript(),
     ],
   },
   {
     input: "src/index.ts",
-    output: [{ file: "dist/index.d.ts", format: "esm" }],
+    output: [{ file: "dist/index.d.ts", format: "cjs" }],
     plugins: [
       dts.default(),
       alias({
         entries: paths,
       }),
       prettier({
-        parser: 'babel',
+        parser: "babel",
         tabWidth: 2,
       }),
     ],
