@@ -1,6 +1,6 @@
 import { getEditorLines } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
-import { CampCommand } from '@t/.';
+import { CampCommand } from '@/types';
 
 // Controller: 이벤트 실행
 class EditorController {

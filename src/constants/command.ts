@@ -1,4 +1,4 @@
-import type { CampCommandInfo } from '@t/.';
+import type { CampCommandInfo } from '@/types';
 
 const COMMAND_INFO: CampCommandInfo = Object.freeze({
   bold: {

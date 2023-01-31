@@ -1,5 +1,5 @@
 import { EditorController } from './EditorController';
-import { CampEditorOptions } from '@t/.';
+import { CampEditorOptions } from '@/types';
 
 class ContentArea {
   options: CampEditorOptions;

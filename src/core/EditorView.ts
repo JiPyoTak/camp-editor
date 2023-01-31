@@ -1,4 +1,4 @@
-import type { CampEditorOptions } from '@t/.';
+import type { CampEditorOptions } from '@/types';
 import { ContentArea } from './ContentArea';
 import { EditorController } from './EditorController';
 import { Toolbar } from './Toolbar';

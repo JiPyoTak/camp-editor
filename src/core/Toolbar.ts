@@ -1,5 +1,5 @@
 import { COMMAND_INFO } from '@/constants/command';
-import { CampCommand, CampEditorOptions } from '@t/.';
+import { CampCommand, CampEditorOptions } from '@/types';
 import { EditorController } from './EditorController';
 
 class Toolbar {
