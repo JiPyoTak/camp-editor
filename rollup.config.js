@@ -4,6 +4,7 @@ import typescript from 'rollup-plugin-typescript2';
 import dts from 'rollup-plugin-dts';
 import prettier from 'rollup-plugin-prettier';
 import alias from '@rollup/plugin-alias';
+import postcss from 'rollup-plugin-postcss';
 
 const paths = [
   {
@@ -20,7 +21,7 @@ export default [
       format: 'esm',
     },
     plugins: [
-      typescript(),
+      typescript({}),
       del({ targets: 'dist/*' }),
       alias({
         entries: paths,
@@ -28,16 +29,26 @@ export default [
     ],
   },
   {
-    input: 'src/index.ts',
+    input: 'src/editor.ts',
     output: [{ file: 'dist/index.d.ts', format: 'cjs' }],
     plugins: [
-      dts.default(),
+      dts.default({}),
       alias({
         entries: paths,
       }),
       prettier({
-        parser: 'babel',
+        parser: 'babel-ts',
         tabWidth: 2,
+      }),
+    ],
+  },
+  {
+    input: 'src/assets/camp-editor.css',
+    output: [{ file: 'dist/index.css', name: 'style' }],
+    plugins: [
+      postcss({
+        module: true,
+        extract: true,
       }),
     ],
   },
