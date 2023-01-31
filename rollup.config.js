@@ -10,10 +10,6 @@ const paths = [
     find: '@',
     replacement: path.resolve(__dirname, 'src'),
   },
-  {
-    find: '@t',
-    replacement: path.resolve(__dirname, 'src/types'),
-  },
 ];
 
 export default [
