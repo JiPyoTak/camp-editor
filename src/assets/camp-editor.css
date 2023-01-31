@@ -1,0 +1,186 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Helvetica Neue', 'Helvetica', arial, sans-serif;
+}
+
+#editor {
+  display: flex;
+  flex-direction: column;
+  width: 40rem;
+  min-height: 18rem;
+  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
+  border-top: 6px solid #4a4a4a;
+  border-radius: 3px;
+  margin: 2rem 0;
+}
+
+.ce-editor-toolbar {
+  display: flex;
+  gap: 5px;
+  box-shadow: 0 1px 4px rgba(122, 100, 100, 0.2);
+}
+.ce-editor-line {
+  display: flex;
+  border-bottom: 1px solid #e2e2e2;
+}
+.ce-editor-line:last-child {
+  border-bottom: none;
+}
+.ce-editor-box {
+  display: flex;
+  border-left: 1px solid #e2e2e2;
+}
+.ce-editor-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: 0.2s ease all;
+}
+.ce-editor-btn:hover,
+.ce-editor-btn.active {
+  background-color: #e1e1e1;
+  cursor: pointer;
+}
+.ce-editor-btn img {
+  width: 15px;
+  padding: 9px;
+  box-sizing: content-box;
+}
+.ce-editor-btn.smaller img {
+  width: 16px;
+}
+.ce-editor-has-submenu {
+  width: 20px;
+  padding: 0 10px;
+}
+
+.ce-editor-has-submenu::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  background-image: url(https://img.icons8.com/ios-glyphs/30/000000/chevron-down.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  right: 4px;
+}
+
+.ce-editor-submenu {
+  display: none;
+  position: absolute;
+  top: 34px;
+  left: -1px;
+  z-index: 10;
+  background-color: #fff;
+  border: 1px solid #b5b5b5;
+  border-top: none;
+}
+
+.ce-editor-submenu:hover {
+  display: block;
+}
+
+.ce-editor-has-submenu:hover .ce-editor-submenu {
+  display: block;
+}
+
+.ce-content-area {
+  flex: 1 1;
+  box-sizing: border-box;
+  width: 100%;
+  height: inherit;
+  padding: 15px 12px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.ce-content-area p {
+  margin: 12px 0;
+}
+
+/* Modal */
+.modal {
+  z-index: 40;
+  display: none;
+}
+.modal .modal-wrapper {
+  background-color: #fff;
+  padding: 1rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20rem;
+  min-height: 10rem;
+  z-index: 41;
+}
+.modal .modal-wrapper .close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+.modal .modal-wrapper .modal-content {
+  flex-direction: column;
+}
+.modal .modal-wrapper .modal-content h3 {
+  margin-top: 0;
+}
+.modal .modal-wrapper .modal-content input {
+  margin: 1rem 0;
+  padding: 0.5rem;
+}
+.modal .modal-wrapper .modal-content input[type='text'] {
+  width: calc(100% - 1rem);
+}
+.modal .modal-wrapper .modal-content .row label {
+  margin-left: 0.5rem;
+}
+.modal .modal-wrapper .modal-content button {
+  background-color: #d2434f;
+  border: 0;
+  color: #fff;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+}
+.modal .modal-bg {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
+/* Codepen Footer */
+footer {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+}
+footer p {
+  margin: 0.5rem 1rem;
+  font-size: 12px;
+}
+footer a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #000;
+}
+
+[contenteditable='true']:empty:before {
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+}
+div[contenteditable='true'] {
+  border: 1px solid #ddd;
+  color: #333;
+  font-size: 12px;
+  padding: 5px;
+}
