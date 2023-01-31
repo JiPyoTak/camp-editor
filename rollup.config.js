@@ -1,9 +1,10 @@
-import del from "rollup-plugin-delete";
-import alias from "@rollup/plugin-alias";
-import path from "path";
-import tsconfig from "./tsconfig.path.json" assert { type: "json" };
-import typescript from "rollup-plugin-typescript2";
-import dts from "rollup-plugin-dts";
+const del = require("rollup-plugin-delete");
+const alias = require("@rollup/plugin-alias");
+const path = require("path");
+const tsconfig = require("./tsconfig.path.json");
+const typescript = require("rollup-plugin-typescript2");
+const dts = require("rollup-plugin-dts");
+const prettier = require("rollup-plugin-prettier");
 
 const paths = Object.entries(tsconfig.compilerOptions.paths).map(
   ([find, [replacement]]) => {
@@ -17,18 +18,33 @@ const paths = Object.entries(tsconfig.compilerOptions.paths).map(
   }
 );
 
-export default {
-  input: "src/index.ts",
-  output: {
-    dir: "dist",
-    format: "esm",
+module.exports = [
+  {
+    input: "src/index.ts",
+    output: {
+      dir: "dist",
+      format: "esm",
+    },
+    plugins: [
+      del({ targets: "dist/*" }),
+      // dts.default(),
+      alias({
+        entries: paths,
+      }),
+      typescript(),
+    ],
   },
-  plugins: [
-    del({ targets: "dist/*" }),
-    dts(),
-    alias({
-      entries: paths,
-    }),
-    typescript(),
-  ],
-};
+  {
+    input: "src/index.ts",
+    output: [{ file: "dist/index.d.ts", format: "esm" }],
+    plugins: [
+      dts.default(),
+      alias({
+        entries: paths,
+      }),
+      prettier({
+        tabWidth: 2,
+      }),
+    ],
+  },
+];
