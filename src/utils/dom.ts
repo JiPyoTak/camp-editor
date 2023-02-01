@@ -40,44 +40,62 @@ export function getEditorLines(selection: Selection): Element[] {
   return Array.prototype.slice.call(content, anchorIdx, focusIdx + 1);
 }
 
-// Function to check if Selection is wrapped in tagName
-export function isWrappedInTag(selection: Selection, tagName: string) {
-  const { startContainer, endContainer } = selection.getRangeAt(0);
-  const _start = customClosest.call(startContainer, (el) =>
-    isParagraph(el.parentNode as Node),
-  );
-  const _end = customClosest.call(endContainer, (el) =>
-    isParagraph(el.parentNode as Node),
-  );
-
-  const newRange = new Range();
-  if (!_start || !_end) {
-    throw new Error('이상한 노드를 반환했습니다.');
+export function getFirstNode(node: Node) {
+  let ret = node;
+  while (ret.firstChild) {
+    ret = ret.firstChild;
   }
-
-  newRange.setStartBefore(_start);
-  newRange.setEndAfter(_end);
-
-  console.log('wrapped: ', newRange.cloneContents().querySelector(tagName));
-
-  return !!newRange.cloneContents().querySelector(tagName);
+  return ret;
 }
 
-export function recursiveChildToParent(node: Node, tagName: string): boolean {
-  if (!node || node.nodeName === 'P') {
-    return false;
-  } else if (node.nodeName === tagName) {
-    return true;
-  } else {
-    for (
-      let parent: Node | null = node.parentNode;
-      parent && parent.nodeName !== 'P';
-      parent = parent.parentNode as Node
-    ) {
-      if (parent.nodeName === tagName) {
-        return true;
-      }
+/**
+ * @description 선택된 영역 안에 tagName이 존재하는지 검사하는 함수
+ * @param rootNode - startContainer와 endContainer가 모두 담겨진 노드
+ * @param startContainer
+ * @param endContainer
+ * @param tagName - 검사할 태그 이름
+ */
+export function isWrappedInTag(
+  rootNode: Node,
+  startContainer: Node,
+  endContainer: Node,
+  tagName: string,
+) {
+  let passEnd = false,
+    goingUp = false;
+  let curNode: Node = startContainer;
+
+  while (curNode) {
+    // 먼저 자기 자신이 tagName인지 검사
+    if (curNode.nodeName === tagName.toUpperCase()) {
+      return true;
+    }
+    // 루트 노드가 되면 더 이상 nextSibling 및 parent 볼 필요 없으므로 false return
+    else if (curNode === rootNode) {
+      return false;
+    }
+    // endContainer 만나거나 이미 만났으면 계속 부모로 올라가며 검사만 해도 됨
+    else if ((curNode === endContainer || passEnd) && curNode.parentNode) {
+      passEnd = true;
+      curNode = curNode.parentNode;
+      goingUp = true;
+    }
+    // 올라온 직후가 아니라면 (부모로부터 내려왔다면) childNodes를 검사해야함
+    else if (!goingUp && curNode.firstChild) {
+      goingUp = false;
+      curNode = curNode.firstChild;
+    }
+    // 올라온 직후라면 nextSibling을 검사해야함
+    else if (curNode.nextSibling) {
+      goingUp = false;
+      curNode = curNode.nextSibling;
+    }
+    // 올라온 직후지만 nextSibling이 없다면 부모로 올라가야함
+    else if (curNode.parentNode) {
+      goingUp = true;
+      curNode = curNode.parentNode;
     }
   }
+
   return false;
 }
