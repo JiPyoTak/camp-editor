@@ -5,9 +5,13 @@ import { CampCommand } from '@/types';
 // Controller: 이벤트 실행
 class EditorController {
   $root: HTMLElement;
+  $textarea: Node;
 
   constructor($root: HTMLElement) {
     this.$root = $root;
+    this.$textarea = this.$root.querySelector(
+      '.ce-editor-content-area',
+    ) as Node;
   }
 
   execCommand(command: CampCommand) {
@@ -29,10 +33,17 @@ class EditorController {
     const selection = document.getSelection();
     if (!selection) return;
 
+    const { $textarea } = this;
     const { startContainer, endContainer } = selection.getRangeAt(0);
 
+    if (
+      !$textarea.contains(startContainer) ||
+      !$textarea.contains(endContainer)
+    )
+      return;
+
     const existTag = isWrappedInTag(
-      this.$root.querySelector('.ce-editor-content-area') as Node,
+      $textarea,
       startContainer,
       endContainer,
       COMMAND_INFO[command].tagName as string,
