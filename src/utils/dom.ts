@@ -5,7 +5,7 @@
  */
 function customClosest<T extends Element | Node>(
   this: T,
-  compareFunction = (_: T) => false
+  compareFunction = (_: T) => false,
 ) {
   let target: T | null = this;
   while (target) {
@@ -38,4 +38,46 @@ export function getEditorLines(selection: Selection): Element[] {
   const focusIdx = Array.prototype.indexOf.call(content, focusLine);
 
   return Array.prototype.slice.call(content, anchorIdx, focusIdx + 1);
+}
+
+// Function to check if Selection is wrapped in tagName
+export function isWrappedInTag(selection: Selection, tagName: string) {
+  const { startContainer, endContainer } = selection.getRangeAt(0);
+  const _start = customClosest.call(startContainer, (el) =>
+    isParagraph(el.parentNode as Node),
+  );
+  const _end = customClosest.call(endContainer, (el) =>
+    isParagraph(el.parentNode as Node),
+  );
+
+  const newRange = new Range();
+  if (!_start || !_end) {
+    throw new Error('이상한 노드를 반환했습니다.');
+  }
+
+  newRange.setStartBefore(_start);
+  newRange.setEndAfter(_end);
+
+  console.log('wrapped: ', newRange.cloneContents().querySelector(tagName));
+
+  return !!newRange.cloneContents().querySelector(tagName);
+}
+
+export function recursiveChildToParent(node: Node, tagName: string): boolean {
+  if (!node || node.nodeName === 'P') {
+    return false;
+  } else if (node.nodeName === tagName) {
+    return true;
+  } else {
+    for (
+      let parent: Node | null = node.parentNode;
+      parent && parent.nodeName !== 'P';
+      parent = parent.parentNode as Node
+    ) {
+      if (parent.nodeName === tagName) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
