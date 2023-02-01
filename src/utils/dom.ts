@@ -99,3 +99,16 @@ export function isWrappedInTag(
 
   return false;
 }
+
+export function sliceNode(node: Node, offset: number) {
+  const firstRange = new Range();
+  const lastRange = new Range();
+
+  firstRange.setStart(node, 0);
+  firstRange.setEnd(node, offset);
+
+  lastRange.setStart(node, offset);
+  lastRange.setEndAfter(node);
+
+  return [firstRange.cloneContents(), lastRange.cloneContents()];
+}
