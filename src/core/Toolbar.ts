@@ -49,7 +49,7 @@ class Toolbar {
   }
 
   initEventListener() {
-    this.$element.addEventListener('click', (e: MouseEvent) => {
+    this.$element.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
 
       const $targetButton = (e.target as HTMLElement).closest(
