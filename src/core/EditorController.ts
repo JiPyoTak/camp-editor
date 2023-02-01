@@ -1,4 +1,4 @@
-import { getEditorLines } from '@/utils/dom';
+import { isWrappedInTag } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import { CampCommand } from '@/types';
 
@@ -26,10 +26,12 @@ class EditorController {
   }
 
   applyFormat(command: CampCommand) {
-    console.log(COMMAND_INFO[command]);
+    console.log('applyFormat', command);
     const selection = document.getSelection();
     if (!selection) return;
-    console.log(getEditorLines(selection));
+    console.log(
+      isWrappedInTag(selection, COMMAND_INFO[command].tagName as string),
+    );
   }
 }
 
