@@ -26,11 +26,16 @@ class EditorController {
   }
 
   applyFormat(command: CampCommand) {
-    console.log('applyFormat', command);
     const selection = document.getSelection();
     if (!selection) return;
-    console.log(
-      isWrappedInTag(selection, COMMAND_INFO[command].tagName as string),
+
+    const { startContainer, endContainer } = selection.getRangeAt(0);
+
+    const existTag = isWrappedInTag(
+      this.$root.querySelector('.ce-editor-content-area') as Node,
+      startContainer,
+      endContainer,
+      COMMAND_INFO[command].tagName as string,
     );
   }
 }
