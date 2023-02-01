@@ -1,17 +1,13 @@
-import { isWrappedInTag } from '@/utils/dom';
+import { getEditorLines, isWrappedInTag } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import { CampCommand } from '@/types';
 
 // Controller: 이벤트 실행
 class EditorController {
   $root: HTMLElement;
-  $textarea: Node;
 
   constructor($root: HTMLElement) {
     this.$root = $root;
-    this.$textarea = this.$root.querySelector(
-      '.ce-editor-content-area',
-    ) as Node;
   }
 
   execCommand(command: CampCommand) {
@@ -33,20 +29,26 @@ class EditorController {
     const selection = document.getSelection();
     if (!selection) return;
 
-    const { $textarea } = this;
-    const { startContainer, endContainer } = selection.getRangeAt(0);
+    const range = selection.getRangeAt(0);
+    const { startContainer, endContainer } = range;
 
+    const $textarea = this.$root.querySelector(
+      '.ce-editor-content-area',
+    ) as Node;
     if (
       !$textarea.contains(startContainer) ||
       !$textarea.contains(endContainer)
     )
       return;
 
+    const tagName = COMMAND_INFO[command].tagName;
+    if (!tagName) throw new Error('Apply Text : need tagName attribute');
+
     const existTag = isWrappedInTag(
       $textarea,
       startContainer,
       endContainer,
-      COMMAND_INFO[command].tagName as string,
+      tagName,
     );
   }
 }
