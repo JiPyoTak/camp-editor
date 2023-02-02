@@ -112,3 +112,131 @@ export function sliceNode(node: Node, offset: number) {
 
   return [firstRange.cloneContents(), lastRange.cloneContents()];
 }
+
+/**
+ * If this is TextNode, slice textContent and insert it where you want
+ * If this is not TextNode or has no parentNode, just return null
+ * @param $node - TextNode
+ * @param standardPoint - standard of slicing index
+ * @returns [Node | null, Node | null]
+ */
+function sliceTextNode($node: Node, standardPoint: number) {
+  const { nodeType, textContent, parentNode } = $node;
+  if (nodeType !== Node.TEXT_NODE) return [null, null];
+  if (!textContent) return [null, null];
+  if (!parentNode) return [null, null];
+
+  const chars = textContent.split('');
+  const textContent1 = chars.splice(0, standardPoint).join('');
+  const textContent2 = chars.join('');
+
+  const $node1 = textContent1 ? document.createTextNode(textContent1) : null;
+  const $node2 = textContent2 ? document.createTextNode(textContent2) : null;
+
+  return [$node1, $node2];
+}
+
+class LinkedList<T> {
+  value: T;
+  prev: LinkedList<T> | null;
+  constructor(value: T, prev?: LinkedList<T>) {
+    this.value = value;
+    this.prev = prev ?? null;
+  }
+  setValue(value: T) {
+    this.value = value;
+  }
+  getValue() {
+    return this.value;
+  }
+}
+
+export function copyWithFormatting(
+  $root: Node,
+  { startContainer, endContainer, startOffset, endOffset }: Range,
+) {
+  const $copiedRoot = $root.cloneNode(false);
+
+  let $startNode: Node | null = null;
+  let $endNode: Node | null = null;
+  
+  // let $startNode: Node | null = null;
+  // let $endNode: Node | null = null;
+  function recursive($current: Node, parentLink: LinkedList<Node>) {
+    const { childNodes } = $current;
+    const isStart = $current === startContainer;
+    const isEnd = $current === endContainer;
+
+    let $copiedNode: Node | null = $current.cloneNode(false);
+    // start와 end 만났을 때
+    //// 상위 DOM을 복제해서 진행해야 한다
+    if (isStart || isEnd) {
+      // TextNode를 잘라서 분배해야 함
+      const [$slicedLeft, $slicedRight] = sliceTextNode(
+        $current,
+        isStart ? startOffset : endOffset,
+      );
+      //// 왼쪽 조각은 복사 직전에 넣어주기
+      if ($slicedLeft) parentLink.getValue().appendChild($slicedLeft);
+      //// 오른쪽 조각은 복사 후 넣어주기
+      $copiedNode = $slicedRight;
+
+      // 상위 DOM 까지 복사하는데, 참조까지 변경해야 한다
+      let $targetUnderRoot: Node | null = null;
+      let curLink: LinkedList<Node> | null = parentLink;
+      let $beforeNode: Node | null = null;
+      while (curLink.prev) {
+        const $copiedParent = curLink.getValue();
+        const $cloned = $copiedParent.cloneNode(false);
+
+        $targetUnderRoot = isStart ? $cloned : $copiedParent;
+
+        if ($beforeNode) $cloned.appendChild($beforeNode);
+        $beforeNode = $cloned;
+
+        curLink.setValue($cloned);
+        curLink = curLink?.prev;
+      }
+
+      const $copiedParent = curLink.getValue();
+      if ($beforeNode) $copiedParent.appendChild($beforeNode);
+
+      if (isStart) {
+        $startNode = $targetUnderRoot;
+      }
+      if (isEnd) {
+        $endNode = $targetUnderRoot;
+      }
+    }
+
+    // 1. 나를 복사해서 상위 부모에 넣기
+    // 2. 나에 대한 LinkedList를 자식에게 넘겨주기
+    const curLink = new LinkedList($copiedNode as Node, parentLink);
+
+    const $copiedParent = parentLink.getValue();
+    if ($copiedNode) $copiedParent.appendChild($copiedNode);
+
+    // 자식 저장하러 ㄱㄱ
+    childNodes.forEach((node) => recursive(node, curLink));
+  }
+
+  $root.childNodes.forEach(($node) => {
+    recursive($node, new LinkedList($copiedRoot));
+  });
+
+  const startIndex = Array.prototype.indexOf.call(
+    $copiedRoot.childNodes,
+    $startNode,
+  );
+  const endIndex = Array.prototype.indexOf.call(
+    $copiedRoot.childNodes,
+    $endNode,
+  );
+  return {
+    $line: $copiedRoot,
+    $startNode,
+    $endNode,
+    startIndex: startIndex === -1 ? 0 : startIndex,
+    endIndex: endIndex === -1 ? $copiedRoot.childNodes.length : endIndex + 1,
+  };
+}
