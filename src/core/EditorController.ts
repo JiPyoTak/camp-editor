@@ -1,4 +1,10 @@
-import { getEditorLines, isWrappedInTag } from '@/utils/dom';
+import {
+  getEditorLines,
+  isWrappedInTag,
+  sliceNode,
+  temp,
+  temp2,
+} from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import { CampCommand } from '@/types';
 
@@ -30,7 +36,7 @@ class EditorController {
     if (!selection) return;
 
     const range = selection.getRangeAt(0);
-    const { startContainer, endContainer } = range;
+    const { startContainer, endContainer, startOffset, endOffset } = range;
 
     const $textarea = this.$root.querySelector(
       '.ce-editor-content-area',
@@ -50,6 +56,12 @@ class EditorController {
       endContainer,
       tagName,
     );
+
+    const lines = getEditorLines(selection);
+    // temp(lines[0], range);
+    temp2(lines[0], range);
+
+    console.log(sliceNode(startContainer, startOffset));
   }
 }
 
