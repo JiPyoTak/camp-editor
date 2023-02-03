@@ -100,15 +100,36 @@ export function isWrappedInTag(
   return false;
 }
 
-export function sliceNode(node: Node, offset: number) {
-  const firstRange = new Range();
-  const lastRange = new Range();
+/**
+ * @description 여러 Offset을 기준으로 텍스트를 분리해 TextNode 배열로 반환하는 함수
+ * @param $node - 분리할 TextNode
+ * @param offset - 분리할 TextNode의 분기점들
+ */
+export function splitTextNode(
+  $node: Node,
+  ...offset: number[]
+): (Node | null)[] {
+  const { nodeType, textContent, parentNode } = $node;
+  if (nodeType !== Node.TEXT_NODE) return [];
+  if (!textContent) return [];
+  if (!parentNode) return [];
 
-  firstRange.setStart(node, 0);
-  firstRange.setEnd(node, offset);
+  const $textNodes = [];
+  let head = 0,
+    tail;
+  offset.push(textContent.length);
 
-  lastRange.setStart(node, offset);
-  lastRange.setEndAfter(node);
+  for (let i = 0; i < offset.length; i++) {
+    tail = offset[i];
 
-  return [firstRange.cloneContents(), lastRange.cloneContents()];
+    if (typeof tail !== 'number') {
+      throw Error('Split Text Node : wrong offset inserted');
+    }
+
+    const text = textContent.slice(head, tail);
+    $textNodes.push(text ? document.createTextNode(text) : null);
+    head = tail;
+  }
+
+  return $textNodes;
 }
