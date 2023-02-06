@@ -1,4 +1,9 @@
-import { getEditorLines } from '@/utils/dom';
+import {
+  getCopiedLineInfo,
+  getEditorLines,
+  isWrappedInTag,
+  wrapLines,
+} from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import { CampCommand } from '@/types';
 
@@ -26,11 +31,61 @@ class EditorController {
   }
 
   applyFormat(command: CampCommand) {
-    console.log(COMMAND_INFO[command]);
     const selection = document.getSelection();
-    if (!selection) return;
-    console.log(getEditorLines(selection));
+    if (!selection) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const { startContainer, endContainer } = range;
+
+    const $textarea = this.$root.querySelector(
+      '.ce-editor-content-area',
+    ) as Node;
+
+    if (
+      !$textarea.contains(startContainer) ||
+      !$textarea.contains(endContainer)
+    ) {
+      return;
+    }
+
+    const tagName = COMMAND_INFO[command].tagName;
+    if (!tagName) throw new Error('Apply Text : need tagName attribute');
+
+    const existTag = isWrappedInTag(
+      $textarea,
+      startContainer,
+      endContainer,
+      tagName,
+    );
+
+    const $lines = getEditorLines(selection);
+
+    // TODO : Text Container 가 start === end 일 때
+    if (existTag) {
+      const lineInfos = $lines.map(($l) => getCopiedLineInfo($l, range));
+
+      const {
+        $lines: $copiedLines,
+        $startContainer,
+        $endContainer,
+      } = wrapLines(lineInfos, tagName);
+
+      for (let i = 0; i < $copiedLines.length; i++) {
+        $textarea.replaceChild($copiedLines[i], $lines[i]);
+      }
+
+      const newRange = new Range();
+
+      newRange.setStartBefore($startContainer);
+      newRange.setEndAfter($endContainer);
+
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
   }
+  // TODO: 태그 삭제하는 기능
 }
 
 export { EditorController };

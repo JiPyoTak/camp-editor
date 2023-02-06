@@ -6,7 +6,7 @@ const COMMAND_INFO: CampCommandInfo = Object.freeze({
     icon: 'https://img.icons8.com/fluency-systems-filled/48/000000/bold.png',
   },
   italic: {
-    tagName: 'i',
+    tagName: 'em',
     icon: 'https://img.icons8.com/fluency-systems-filled/48/000000/italic.png',
   },
   underline: {
