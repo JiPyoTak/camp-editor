@@ -1,5 +1,4 @@
-import LinkedList from '@/utils/class/LinkedList';
-import type { ICopiedLinesInfo } from '@/types';
+import type Lines from '@/utils/class/Lines';
 
 /**
  * Provide closest with custom function
@@ -137,119 +136,32 @@ export function splitTextNode(
   return $textNodes;
 }
 
-export function getCopiedLineInfo(
-  $root: Node,
-  { startContainer, endContainer, startOffset, endOffset }: Range,
-): ICopiedLinesInfo {
-  const $copiedRoot = $root.cloneNode(false);
-
-  let $startNode: Node | null = null;
-  let $endNode: Node | null = null;
-
-  function recursive($current: Node, parentLink: LinkedList<Node>) {
-    const { childNodes } = $current;
-    const isStart = $current === startContainer;
-    const isEnd = $current === endContainer;
-
-    let $currentCopied: Node | null = $current.cloneNode(false);
-
-    // 복사하는 노드가 startContainer or endContainer 일 때
-    // TODO : start / end 가 TextNode가 아닐 때 동작
-    if (isStart || isEnd) {
-      const currentOffset = isStart ? startOffset : endOffset;
-      let currentLink: LinkedList<Node> | null = parentLink;
-      let $targetUnderRoot: Node | null = null;
-      let $beforeCopied: Node | null = null;
-
-      const [$slicedLeft, $slicedRight] = splitTextNode(
-        $current,
-        currentOffset,
-      );
-
-      if ($slicedLeft) {
-        parentLink.getValue().appendChild($slicedLeft);
-      }
-
-      while (currentLink?.getPrev()) {
-        const $currentParent = currentLink.getValue();
-        const $copiedParent = $currentParent.cloneNode(false);
-
-        if ($beforeCopied) {
-          $copiedParent.appendChild($beforeCopied);
-        }
-
-        currentLink.setValue($copiedParent);
-        currentLink = currentLink.getPrev();
-        $targetUnderRoot = isStart ? $copiedParent : $currentParent;
-        $beforeCopied = $copiedParent;
-      }
-
-      const $copiedParent = currentLink?.getValue();
-
-      if ($beforeCopied) {
-        $copiedParent?.appendChild($beforeCopied);
-      }
-
-      if (isStart) {
-        $startNode = $targetUnderRoot;
-      } else if (isEnd) {
-        $endNode = $targetUnderRoot;
-      }
-
-      $currentCopied = $slicedRight;
-    }
-
-    const currentLink = new LinkedList($currentCopied as Node, parentLink);
-    const $currentParent = parentLink.getValue();
-
-    if ($currentCopied) {
-      $currentParent.appendChild($currentCopied);
-    }
-
-    childNodes.forEach((node) => {
-      recursive(node, currentLink);
-    });
+export function wrapLines(lineInfos: Lines, tagName: string) {
+  const $lines = [];
+  const { $nodes, $from, $to } = lineInfos;
+  console.log(lineInfos);
+  if (!$from || !$to) {
+    throw new Error('Wrapping Lines : Invalid Range information');
   }
 
-  $root.childNodes.forEach(($node) => {
-    recursive($node, new LinkedList($copiedRoot));
-  });
+  for (let i = 0; i < $nodes.length; i++) {
+    const $line = $nodes[i];
+    const $childNodes = $line.childNodes;
 
-  const startIndex = Array.prototype.indexOf.call(
-    $copiedRoot.childNodes,
-    $startNode,
-  );
+    const fromIndex = Array.prototype.indexOf.call($childNodes, $from);
+    const toIndex = Array.prototype.indexOf.call($childNodes, $to);
+    const startIndex = fromIndex === -1 ? 0 : fromIndex;
+    const endIndex = toIndex === -1 ? $childNodes.length : toIndex + 1;
 
-  const endIndex = Array.prototype.indexOf.call(
-    $copiedRoot.childNodes,
-    $endNode,
-  );
-
-  return {
-    $line: $copiedRoot,
-    $startNode,
-    $endNode,
-    startIndex: startIndex === -1 ? 0 : startIndex,
-    endIndex: endIndex === -1 ? $copiedRoot.childNodes.length : endIndex + 1,
-  };
-}
-
-export function wrapLines(lineInfos: ICopiedLinesInfo[], tagName: string) {
-  const $lines = [];
-  let $startContainer: Node | null = null;
-  let $endContainer: Node | null = null;
-
-  for (let i = 0; i < lineInfos.length; i++) {
-    const { $line, $startNode, $endNode, startIndex, endIndex } = lineInfos[i];
     const targetChilds = Array.prototype.slice.call(
-      $line.childNodes,
+      $childNodes,
       startIndex,
       endIndex,
     );
 
     const $wrapper = document.createElement(tagName);
-    if ($line.childNodes.length !== 0) {
-      $line.insertBefore($wrapper, $line.childNodes.item(startIndex));
+    if ($childNodes.length !== 0) {
+      $line.insertBefore($wrapper, $childNodes.item(startIndex));
     } else {
       $line.appendChild($wrapper);
     }
@@ -258,21 +170,8 @@ export function wrapLines(lineInfos: ICopiedLinesInfo[], tagName: string) {
       $line.removeChild($child);
       $wrapper.appendChild($child);
     });
-
-    if ($startNode) {
-      $startContainer = $startNode;
-    }
-
-    if ($endNode) {
-      $endContainer = $endNode;
-    }
-
     $lines.push($line);
   }
 
-  if (!$startContainer || !$endContainer) {
-    throw new Error('Wrapping Lines : Invalid Range information');
-  }
-
-  return { $lines, $startContainer, $endContainer };
+  return { $lines, $startContainer: $from, $endContainer: $to };
 }

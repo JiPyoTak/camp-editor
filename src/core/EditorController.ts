@@ -1,11 +1,7 @@
-import {
-  getCopiedLineInfo,
-  getEditorLines,
-  isWrappedInTag,
-  wrapLines,
-} from '@/utils/dom';
+import { getEditorLines, isWrappedInTag, wrapLines } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
-import { CampCommand } from '@/types';
+import type { CampCommand } from '@/types';
+import Lines from '@/utils/class/Lines';
 
 // Controller: 이벤트 실행
 class EditorController {
@@ -15,7 +11,7 @@ class EditorController {
     this.$root = $root;
   }
 
-  execCommand(command: CampCommand) {
+  execCommand<T extends Event>(command: CampCommand, event?: T) {
     // TODO: 많아지면 리팩토링 생각해보기
     switch (command) {
       case 'bold':
@@ -64,13 +60,13 @@ class EditorController {
 
     // TODO : Text Container 가 start === end 일 때
     if (existTag) {
-      const lineInfos = $lines.map(($l) => getCopiedLineInfo($l, range));
+      const separatedLines = new Lines($lines, range);
 
       const {
         $lines: $copiedLines,
         $startContainer,
         $endContainer,
-      } = wrapLines(lineInfos, tagName);
+      } = wrapLines(separatedLines, tagName);
 
       for (let i = 0; i < $copiedLines.length; i++) {
         $textarea.replaceChild($copiedLines[i], $lines[i]);
