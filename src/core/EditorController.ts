@@ -1,4 +1,4 @@
-import { getEditorLines } from '@/utils/dom';
+import { getEditorLines, isWrappedInTag } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import { CampCommand } from '@/types';
 
@@ -26,10 +26,30 @@ class EditorController {
   }
 
   applyFormat(command: CampCommand) {
-    console.log(COMMAND_INFO[command]);
     const selection = document.getSelection();
     if (!selection) return;
-    console.log(getEditorLines(selection));
+
+    const range = selection.getRangeAt(0);
+    const { startContainer, endContainer } = range;
+
+    const $textarea = this.$root.querySelector(
+      '.ce-editor-content-area',
+    ) as Node;
+    if (
+      !$textarea.contains(startContainer) ||
+      !$textarea.contains(endContainer)
+    )
+      return;
+
+    const tagName = COMMAND_INFO[command].tagName;
+    if (!tagName) throw new Error('Apply Text : need tagName attribute');
+
+    const existTag = isWrappedInTag(
+      $textarea,
+      startContainer,
+      endContainer,
+      tagName,
+    );
   }
 }
 
