@@ -151,7 +151,7 @@ export function wrapLines(lineInfos: Lines, tagName: string) {
     const fromIndex = Array.prototype.indexOf.call($childNodes, $from);
     const toIndex = Array.prototype.indexOf.call($childNodes, $to);
     const startIndex = fromIndex === -1 ? 0 : fromIndex;
-    const endIndex = toIndex === -1 ? $childNodes.length : toIndex + 1;
+    const endIndex = toIndex === -1 ? $childNodes.length : toIndex;
 
     const targetChilds = Array.prototype.slice.call(
       $childNodes,

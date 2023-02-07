@@ -75,7 +75,7 @@ class EditorController {
       const newRange = new Range();
 
       newRange.setStartBefore($startContainer);
-      newRange.setEndAfter($endContainer);
+      newRange.setEndBefore($endContainer);
 
       selection.removeAllRanges();
       selection.addRange(newRange);

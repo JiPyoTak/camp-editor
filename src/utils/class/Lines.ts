@@ -30,12 +30,24 @@ class Lines implements ILinesInfo {
   }
 
   copyLine($line: Node) {
+    const { startContainer, endContainer, startOffset, endOffset } = this.range;
+    const isStart = $line === startContainer;
+    const isEnd = $line === endContainer;
+    if (isStart || isEnd) {
+      const $copiedRoot = $line.cloneNode(true);
+
+      const offset = isStart ? startOffset : endOffset;
+      const saveAttribute = isStart ? '$from' : '$to';
+      this.setUnderRoot(saveAttribute, $copiedRoot.childNodes.item(offset));
+
+      return $copiedRoot;
+    }
+
     const $copiedRoot = $line.cloneNode(false);
 
     $line.childNodes.forEach(($child) => {
       this.copyDFS($child, new LinkedList($copiedRoot));
     });
-
     return $copiedRoot;
   }
 
@@ -69,14 +81,9 @@ class Lines implements ILinesInfo {
         this.appendAndCopyChildren($copiedLeft, leftChildNodes, parentLink);
       }
 
-      const { $nowUnderRoot, $prevUnderRoot } = this.saveAsOther(
-        $copiedRight,
-        parentLink,
-      );
+      const { $nowUnderRoot } = this.saveAsOther($copiedRight, parentLink);
       const saveAttribute = isStart ? '$from' : '$to';
-      const $saveUnderRoot = isStart
-        ? $nowUnderRoot ?? $copiedRight
-        : $prevUnderRoot ?? $copiedLeft;
+      const $saveUnderRoot = $nowUnderRoot ?? $copiedRight;
       this.setUnderRoot(saveAttribute, $saveUnderRoot);
 
       if ($copiedRight) {
@@ -106,7 +113,6 @@ class Lines implements ILinesInfo {
     let nowLink: LinkedList<Node> | null = parentLink;
     let $prevCopiedNode: Node | null = $target;
     let $nowUnderRoot: Node | null = null;
-    let $prevUnderRoot: Node | null = null;
 
     while (nowLink) {
       const $child = $prevCopiedNode;
@@ -114,7 +120,6 @@ class Lines implements ILinesInfo {
 
       if (!nowLink.isRoot()) {
         $prevCopiedNode = $currentParent.cloneNode(false);
-        $prevUnderRoot = $currentParent;
         nowLink.setValue($prevCopiedNode);
       }
 
@@ -127,7 +132,7 @@ class Lines implements ILinesInfo {
       $nowUnderRoot = $prevCopiedNode;
     }
 
-    return { $nowUnderRoot, $prevUnderRoot };
+    return { $nowUnderRoot };
   }
 }
 
