@@ -5,11 +5,11 @@ import type Lines from '@/utils/class/Lines';
  * @param compareFunction - (target) => boolean
  * @returns Element | Node | null
  */
-function customClosest<T extends Element | Node>(
-  this: T,
+export function customClosest<T extends Element | Node>(
+  $node: T,
   compareFunction = (_: T) => false,
 ) {
-  let target: T | null = this;
+  let target: T | null = $node;
   while (target) {
     if (compareFunction(target)) {
       return target;
@@ -28,8 +28,8 @@ function isParagraph(el: Element | Node) {
 export function getEditorLines(selection: Selection): Element[] {
   const [anchorNode, focusNode] = selection.getForwardNodes();
 
-  const anchorLine = customClosest.call(anchorNode, (el) => isParagraph(el));
-  const focusLine = customClosest.call(focusNode, (el) => isParagraph(el));
+  const anchorLine = customClosest(anchorNode, (el) => isParagraph(el));
+  const focusLine = customClosest(focusNode, (el) => isParagraph(el));
 
   const content = anchorLine?.parentElement?.children;
 
@@ -136,22 +136,21 @@ export function splitTextNode(
   return $textNodes;
 }
 
-export function wrapLines(lineInfos: Lines, tagName: string) {
-  const $lines = [];
-  const { $nodes, $from, $to } = lineInfos;
-  console.log(lineInfos);
-  if (!$from || !$to) {
-    throw new Error('Wrapping Lines : Invalid Range information');
+export function getLastOffset($node: Node) {
+  if (!$node) return 0;
+
+  if ($node.nodeType === Node.TEXT_NODE) {
+    return $node.textContent?.length ?? 0;
   }
 
-  for (let i = 0; i < $nodes.length; i++) {
-    const $line = $nodes[i];
-    const $childNodes = $line.childNodes;
+  return $node.childNodes.length;
+}
 
-    const fromIndex = Array.prototype.indexOf.call($childNodes, $from);
-    const toIndex = Array.prototype.indexOf.call($childNodes, $to);
-    const startIndex = fromIndex === -1 ? 0 : fromIndex;
-    const endIndex = toIndex === -1 ? $childNodes.length : toIndex;
+export function wrapLines(lineInfos: Lines, tagName: string) {
+  const $lines: Node[] = [];
+
+  lineInfos.forEachRange(([$line, startIndex, endIndex]) => {
+    const $childNodes = $line.childNodes;
 
     const targetChilds = Array.prototype.slice.call(
       $childNodes,
@@ -170,8 +169,9 @@ export function wrapLines(lineInfos: Lines, tagName: string) {
       $line.removeChild($child);
       $wrapper.appendChild($child);
     });
-    $lines.push($line);
-  }
 
-  return { $lines, $startContainer: $from, $endContainer: $to };
+    $lines.push($line);
+  });
+
+  return $lines;
 }

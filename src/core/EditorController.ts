@@ -61,12 +61,14 @@ class EditorController {
     // TODO : Text Container 가 start === end 일 때
     if (existTag) {
       const separatedLines = new Lines($lines, range);
+      const $copiedLines = wrapLines(separatedLines, tagName);
+      const { $from, fromOffset, $to, toOffset } = separatedLines;
 
-      const {
-        $lines: $copiedLines,
-        $startContainer,
-        $endContainer,
-      } = wrapLines(separatedLines, tagName);
+      console.log(separatedLines);
+
+      if (!$from || !$to) {
+        throw new Error('Wrapping Lines : Invalid Range information');
+      }
 
       for (let i = 0; i < $copiedLines.length; i++) {
         $textarea.replaceChild($copiedLines[i], $lines[i]);
@@ -74,8 +76,8 @@ class EditorController {
 
       const newRange = new Range();
 
-      newRange.setStartBefore($startContainer);
-      newRange.setEndBefore($endContainer);
+      newRange.setStart($from, fromOffset);
+      newRange.setEnd($to, toOffset);
 
       selection.removeAllRanges();
       selection.addRange(newRange);

@@ -1,48 +1,127 @@
 import LinkedList from '@/utils/class/LinkedList';
-import { splitTextNode } from '@/utils/dom';
+import { customClosest, getLastOffset, splitTextNode } from '@/utils/dom';
 
-interface ILinesInfo {
-  $nodes: Node[];
-  $from: Node | null;
-  $to: Node | null;
-  range: Range;
+interface CustomRange {
+  startContainer: Node;
+  endContainer: Node;
+  startOffset: number;
+  endOffset: number;
 }
 
-class Lines implements ILinesInfo {
-  $nodes: Node[];
-  $from: Node | null;
-  $to: Node | null;
-  range: Range;
+class Lines {
+  $originalLines: Node[];
+  originalRange: CustomRange;
+  slicedNodes: {
+    from: [Node | null, Node | null];
+    to: [Node | null, Node | null];
+  };
+
+  $lines: Node[];
+  $from: Node;
+  fromOffset: number;
+  $to: Node;
+  toOffset: number;
+  rangeIndex: number[][];
 
   constructor($lines: Node[], range: Range) {
-    this.$from = null;
-    this.$to = null;
-    this.range = range;
-    this.$nodes = $lines.map(($line) => this.copyLine($line));
+    this.$originalLines = $lines;
+    this.originalRange = this.getValidRange(range);
+    this.slicedNodes = {
+      from: [null, null],
+      to: [null, null],
+    };
+
+    this.$lines = $lines.map(($line) => this.copyLine($line));
+
+    const { $container: $from, offset: fromOffset } = this.normalizeContainer(
+      this.slicedNodes.from,
+    );
+    this.$from = $from;
+    this.fromOffset = fromOffset;
+
+    const { $container: $to, offset: toOffset } = this.normalizeContainer(
+      this.slicedNodes.to,
+    );
+    this.$to = $to;
+    this.toOffset = toOffset;
+
+    this.rangeIndex = this.getRangeIndex();
   }
 
-  setUnderRoot(attributeName: string, $target: Node | null) {
-    if (attributeName === '$from') {
-      this.$from = $target;
-    } else if (attributeName === '$to') {
-      this.$to = $target;
+  getValidRange(range: Range) {
+    let { startContainer, endContainer, startOffset, endOffset } = range;
+
+    const $lastLine = this.$originalLines[this.$originalLines.length - 1];
+    // TODO : startContainer when Line
+    if (endContainer === $lastLine) {
+      endContainer = $lastLine.childNodes.item(endOffset);
+      endOffset = 0;
+    }
+
+    return { startContainer, endContainer, startOffset, endOffset };
+  }
+
+  normalizeContainer(slicedNodes: [Node | null, Node | null]) {
+    const [$left, $right] = slicedNodes;
+    const $container = $right ?? $left;
+
+    if (!$container) {
+      throw new Error('Copy Lines : Unavailable sliced nodes');
+    }
+
+    const offset = $right ? 0 : getLastOffset($container);
+
+    return { $container, offset };
+  }
+
+  getRangeIndex() {
+    const length = this.$lines.length;
+
+    const firstLine = this.$lines[0];
+    const $fromUnderRoot = customClosest(
+      this.$from,
+      ($node) => $node.parentNode === firstLine,
+    );
+
+    const lastLine = this.$lines[length - 1];
+    const $toUnderRoot = customClosest(
+      this.$to,
+      ($node) => $node.parentNode === lastLine,
+    );
+
+    const Indexes = this.$lines.map(($line) => [0, $line.childNodes.length]);
+
+    const fromIndex = Array.prototype.indexOf.call(
+      firstLine.childNodes,
+      $fromUnderRoot,
+    );
+    const fromAdditional = !this.slicedNodes.from[1] ? 1 : 0;
+    Indexes[0][0] = fromIndex + fromAdditional;
+    const toIndex = Array.prototype.indexOf.call(
+      lastLine.childNodes,
+      $toUnderRoot,
+    );
+    const toAdditional = !this.slicedNodes.to[1] ? 1 : 0;
+    Indexes[length - 1][1] = toIndex + toAdditional;
+
+    return Indexes;
+  }
+
+  forEachRange(
+    fn: (
+      [$line, start, end]: [Node, number, number],
+      index?: number,
+      $lines?: Node[],
+    ) => unknown,
+  ) {
+    for (let i = 0; i < this.$lines.length; i++) {
+      const $line = this.$lines[i];
+      const [startIndex, endIndex] = this.rangeIndex[i];
+      fn([$line, startIndex, endIndex], i, this.$lines);
     }
   }
 
   copyLine($line: Node) {
-    const { startContainer, endContainer, startOffset, endOffset } = this.range;
-    const isStart = $line === startContainer;
-    const isEnd = $line === endContainer;
-    if (isStart || isEnd) {
-      const $copiedRoot = $line.cloneNode(true);
-
-      const offset = isStart ? startOffset : endOffset;
-      const saveAttribute = isStart ? '$from' : '$to';
-      this.setUnderRoot(saveAttribute, $copiedRoot.childNodes.item(offset));
-
-      return $copiedRoot;
-    }
-
     const $copiedRoot = $line.cloneNode(false);
 
     $line.childNodes.forEach(($child) => {
@@ -52,7 +131,8 @@ class Lines implements ILinesInfo {
   }
 
   copyDFS($current: Node, parentLink: LinkedList<Node>) {
-    const { startContainer, endContainer, startOffset, endOffset } = this.range;
+    const { startContainer, endContainer, startOffset, endOffset } =
+      this.originalRange;
     const { childNodes } = $current;
     const isStart = $current === startContainer;
     const isEnd = $current === endContainer;
@@ -81,14 +161,14 @@ class Lines implements ILinesInfo {
         this.appendAndCopyChildren($copiedLeft, leftChildNodes, parentLink);
       }
 
-      const { $nowUnderRoot } = this.saveAsOther($copiedRight, parentLink);
-      const saveAttribute = isStart ? '$from' : '$to';
-      const $saveUnderRoot = $nowUnderRoot ?? $copiedRight;
-      this.setUnderRoot(saveAttribute, $saveUnderRoot);
+      this.saveAsOther($copiedRight, parentLink);
 
       if ($copiedRight) {
         this.appendAndCopyChildren($copiedRight, rightChildNodes, parentLink);
       }
+
+      const saveAttribute = isStart ? 'from' : 'to';
+      this.slicedNodes[saveAttribute] = [$copiedLeft, $copiedRight];
     } else {
       const $currentCopied: Node = $current.cloneNode(false);
       this.appendAndCopyChildren($currentCopied, childNodes, parentLink);
@@ -112,7 +192,6 @@ class Lines implements ILinesInfo {
   saveAsOther($target: Node | null, parentLink: LinkedList<Node>) {
     let nowLink: LinkedList<Node> | null = parentLink;
     let $prevCopiedNode: Node | null = $target;
-    let $nowUnderRoot: Node | null = null;
 
     while (nowLink) {
       const $child = $prevCopiedNode;
@@ -129,10 +208,7 @@ class Lines implements ILinesInfo {
       }
 
       nowLink = nowLink.getPrev();
-      $nowUnderRoot = $prevCopiedNode;
     }
-
-    return { $nowUnderRoot };
   }
 }
 
