@@ -110,8 +110,8 @@ class Lines {
   forEachRange(
     fn: (
       [$line, start, end]: [Node, number, number],
-      index?: number,
-      $lines?: Node[],
+      index: number,
+      $lines: Node[],
     ) => unknown,
   ) {
     for (let i = 0; i < this.$lines.length; i++) {

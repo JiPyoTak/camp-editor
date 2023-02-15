@@ -1,4 +1,4 @@
-import { getEditorLines, isWrappedInTag, wrapLines } from '@/utils/dom';
+import { getEditorLines, isWrappedInTag, wrapLine } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import type { CampCommand } from '@/types';
 import Lines from '@/utils/class/Lines';
@@ -60,19 +60,17 @@ class EditorController {
 
     // TODO : Text Container 가 start === end 일 때
     if (existTag) {
-      const separatedLines = new Lines($lines, range);
-      const $copiedLines = wrapLines(separatedLines, tagName);
-      const { $from, fromOffset, $to, toOffset } = separatedLines;
-
-      console.log(separatedLines);
-
+      const copiedLines = new Lines($lines, range);
+      const { $from, fromOffset, $to, toOffset } = copiedLines;
       if (!$from || !$to) {
         throw new Error('Wrapping Lines : Invalid Range information');
       }
 
-      for (let i = 0; i < $copiedLines.length; i++) {
-        $textarea.replaceChild($copiedLines[i], $lines[i]);
-      }
+      copiedLines.forEachRange((...props) => {
+        const [[$copiedLine], i] = props;
+        wrapLine(tagName, ...props[0]);
+        $textarea.replaceChild($copiedLine, $lines[i]);
+      });
 
       const newRange = new Range();
 
@@ -81,9 +79,10 @@ class EditorController {
 
       selection.removeAllRanges();
       selection.addRange(newRange);
+    } else {
+      // TODO: 태그 삭제하는 기능
     }
   }
-  // TODO: 태그 삭제하는 기능
 }
 
 export { EditorController };

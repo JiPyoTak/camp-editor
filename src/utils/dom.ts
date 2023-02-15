@@ -146,32 +146,29 @@ export function getLastOffset($node: Node) {
   return $node.childNodes.length;
 }
 
-export function wrapLines(lineInfos: Lines, tagName: string) {
-  const $lines: Node[] = [];
+export function wrapLine(
+  tagName: string,
+  $line: Node,
+  startIndex: number,
+  endIndex: number,
+) {
+  const $childNodes = $line.childNodes;
 
-  lineInfos.forEachRange(([$line, startIndex, endIndex]) => {
-    const $childNodes = $line.childNodes;
+  const targetChilds = Array.prototype.slice.call(
+    $childNodes,
+    startIndex,
+    endIndex,
+  );
 
-    const targetChilds = Array.prototype.slice.call(
-      $childNodes,
-      startIndex,
-      endIndex,
-    );
+  const $wrapper = document.createElement(tagName);
+  if ($childNodes.length !== 0) {
+    $line.insertBefore($wrapper, $childNodes.item(startIndex));
+  } else {
+    $line.appendChild($wrapper);
+  }
 
-    const $wrapper = document.createElement(tagName);
-    if ($childNodes.length !== 0) {
-      $line.insertBefore($wrapper, $childNodes.item(startIndex));
-    } else {
-      $line.appendChild($wrapper);
-    }
-
-    targetChilds.forEach(($child) => {
-      $line.removeChild($child);
-      $wrapper.appendChild($child);
-    });
-
-    $lines.push($line);
+  targetChilds.forEach(($child) => {
+    $line.removeChild($child);
+    $wrapper.appendChild($child);
   });
-
-  return $lines;
 }
