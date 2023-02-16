@@ -202,3 +202,22 @@ export function clearLine(
     }
   }
 }
+
+export const getRelativePosition = (
+  $parent: HTMLElement,
+  $target: HTMLElement,
+) => {
+  const parentRect = $parent.getBoundingClientRect();
+  const targetRect = $target.getBoundingClientRect();
+
+  const elementTop = window.pageYOffset + parentRect.top;
+  const targetTop = window.pageYOffset + targetRect.top;
+
+  const elementLeft = window.pageXOffset + parentRect.left;
+  const targetLeft = window.pageXOffset + targetRect.left;
+
+  return {
+    left: Math.abs(targetLeft - elementLeft),
+    top: parentRect.height - Math.abs(elementTop - targetTop),
+  };
+};
