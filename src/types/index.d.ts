@@ -1,2 +1,3 @@
-export * from './editor';
 export * from './command';
+export * from './dom';
+export * from './editor';

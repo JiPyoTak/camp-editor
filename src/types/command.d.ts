@@ -1,8 +1,9 @@
-type CampCommand =
+import Submenu from '@/core/submenu/Submenu';
+import TableSubmenu from '@/core/submenu/Table';
+
+type CampFormatCommand =
   | 'undo'
   | 'redo'
-  | 'font'
-  | 'font-size'
   | 'bold'
   | 'underline'
   | 'italic'
@@ -11,8 +12,6 @@ type CampCommand =
   | 'superscript'
   | 'remove-format'
   | 'heading'
-  | 'font-color'
-  | 'font-background-color'
   | 'code-block'
   | 'inline-code-block'
   | 'indent'
@@ -22,7 +21,6 @@ type CampCommand =
   | 'align'
   | 'horizontal-line'
   | 'line-height'
-  | 'table'
   | 'image'
   | 'video'
   | 'preview'
@@ -30,13 +28,40 @@ type CampCommand =
   | 'full-screen'
   | 'help';
 
+type CampSubmenuCommand =
+  | 'table'
+  | 'font'
+  | 'font-size'
+  | 'font-color'
+  | 'font-background-color';
+
+type CampCommand = CampFormatCommand | CampSubmenuCommand;
+
 interface CampCommandDetail {
   icon: string;
   tagName?: keyof HTMLElementTagNameMap;
+  sub?: TableSubmenu | Submenu;
 }
 
-type CampCommandInfo = {
-  [key in CampCommand]: CampCommandDetail;
-};
+interface CampCommandBaseDetail {
+  icon: string;
+}
 
-export type { CampCommand, CampCommandDetail, CampCommandInfo };
+type CampCommandInfo =
+  | {
+      [key in CampFormatCommand]: CampCommandBaseDetail & {
+        tagName: keyof HTMLElementTagNameMap;
+      };
+    } & {
+      [keu in CampSubmenuCommand]: CampCommandBaseDetail & {
+        sub: TableSubmenu | Submenu;
+      };
+    };
+
+export type {
+  CampCommand,
+  CampCommandDetail,
+  CampCommandInfo,
+  CampSubmenuCommand,
+  CampFormatCommand,
+};

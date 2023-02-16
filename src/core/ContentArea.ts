@@ -25,6 +25,8 @@ class ContentArea {
     $element.setAttribute('placeholder', '석호짱');
     $element.style.height = options.height;
 
+    $element.innerHTML = `<p>ㄱㄴㄷ<strong>ㄹ</strong><em><strong>ㅁ<u>ㅂ</u></strong></em><strong><u>ㅅ</u></strong>ㅇㅈ<strong>ㅊㅋㅌㅍㅎㅏㅑㅓㅕ<u>ㅗㅛㅜㅠㅡㅣ<br></u></strong></p><p><strong><u>ㄱㄴㄷㄹㅁㅂㅅㅇ</u>ㅈ</strong>ㅊ<em>ㅋㅌ<strong>ㅍㅎㅏㅑㅓㅕㅗ</strong></em><del><em><strong>ㅛㅜㅠㅡㅣ<br></strong></em></del></p><p><del><em><strong>ㄱㄴㄷㄹㅁㅂㅅㅇ</strong></em><u><em><strong>ㅈㅊㅋㅌㅍㅎㅏ</strong>ㅑㅓㅕㅗㅛㅜㅠㅡㅣ<br></em></u></del></p><p><del><u><em>ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌ</em></u><em>ㅍ</em>ㅎㅏㅑㅓㅕㅗㅛ</del>ㅜㅠㅡㅣ</p><p> </p>`;
+
     return $element;
   }
 
@@ -37,7 +39,6 @@ class ContentArea {
         const selection = document.getSelection();
         if (selection?.anchorNode?.parentElement?.tagName === 'LI') return;
         // todo
-        // document.execCommand('formatBlock', false, 'p');
       } else if (
         key === 'Backspace' &&
         children.length === 1 &&

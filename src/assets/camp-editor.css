@@ -19,6 +19,7 @@ body {
 }
 
 .ce-editor-toolbar {
+  position: relative;
   display: flex;
   gap: 5px;
   box-shadow: 0 1px 4px rgba(122, 100, 100, 0.2);
@@ -30,6 +31,14 @@ body {
 .ce-editor-line:last-child {
   border-bottom: none;
 }
+
+.ce-editor-button-list {
+  display: flex;
+  width: 100%;
+  padding: 4px 3px;
+  gap: 10px;
+}
+
 .ce-editor-box {
   display: flex;
   border-left: 1px solid #e2e2e2;
@@ -71,15 +80,29 @@ body {
   right: 4px;
 }
 
+.ce-editor-submenu-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+}
+
 .ce-editor-submenu {
   display: none;
   position: absolute;
   top: 34px;
-  left: -1px;
-  z-index: 10;
+  left: 1px;
+  z-index: 5;
+  padding: 5px 6px;
+  margin: 2px 0 0;
+  font-size: 14px;
+  list-style: none;
   background-color: #fff;
-  border: 1px solid #b5b5b5;
-  border-top: none;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
 }
 
 .ce-editor-submenu:hover {
@@ -90,7 +113,60 @@ body {
   display: block;
 }
 
-.ce-content-area {
+.ce-table-size {
+  font-size: 18px;
+}
+
+.ce-table-size-picker {
+  position: absolute !important;
+  z-index: 3;
+  font-size: 18px;
+  width: 10em;
+  height: 10em;
+  cursor: pointer;
+}
+
+.ce-table-size-unhighlighted {
+  position: relative !important;
+  z-index: 1;
+  font-size: 18px;
+  width: 10em;
+  height: 10em;
+  background: url('./images/cel.png') repeat;
+}
+
+.ce-table-size-highlighted {
+  position: absolute !important;
+  z-index: 2;
+  font-size: 18px;
+  width: 1em;
+  height: 1em;
+  background: url('./images/cel-focus.png') repeat;
+}
+
+.ce-table-size-input-box {
+  display: flex;
+  width: 100%;
+  gap: 5px;
+  margin-top: 5px;
+}
+.ce-table-size-input {
+  width: 18px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+  z-index: 2;
+}
+.ce-table-size-input[type='number']::-webkit-outer-spin-button,
+.ce-table-size-input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.ce-editor-submenu .ce-content-area {
   flex: 1 1;
   box-sizing: border-box;
   width: 100%;
@@ -183,4 +259,37 @@ div[contenteditable='true'] {
   color: #333;
   font-size: 12px;
   padding: 5px;
+}
+
+table {
+  display: table;
+  table-layout: fixed;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 10px;
+  background-color: transparent;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table tr {
+  border: 1px solid #efefef;
+}
+
+table td,
+table th {
+  border: 1px solid #e1e1e1;
+  padding: 0.4em;
+  background-clip: padding-box;
+}
+
+td div {
+  margin: 0;
+  padding: 0;
+}
+
+table td {
+  line-height: 18px;
+  height: 18px;
 }
