@@ -16,6 +16,7 @@ body {
   border-top: 6px solid #4a4a4a;
   border-radius: 3px;
   margin: 2rem 0;
+  overflow: hidden;
 }
 
 .ce-editor-toolbar {
@@ -259,6 +260,68 @@ div[contenteditable='true'] {
   color: #333;
   font-size: 12px;
   padding: 5px;
+  position: relative;
+  overflow-y: scroll;
+}
+
+.ce-image-resizer-container {
+  background-color: #3f9dff4d;
+  border: 1px solid #3f9dff;
+  position: absolute;
+}
+
+.ce-image-resizer-container > span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #3f9dff;
+  border: 1px solid #4592ff;
+  box-sizing: border-box;
+}
+
+.ce-image-resizer-container > .tl {
+  cursor: nw-resize;
+  top: -5px;
+  left: -5px;
+}
+.ce-image-resizer-container > .t {
+  cursor: n-resize;
+  top: -5px;
+  left: 50%;
+}
+.ce-image-resizer-container > .tr {
+  cursor: ne-resize;
+  top: -5px;
+  right: -5px;
+}
+.ce-image-resizer-container > .l {
+  cursor: w-resize;
+  top: 50%;
+  left: -5px;
+}
+.ce-image-resizer-container > .r {
+  cursor: e-resize;
+  top: 50%;
+  right: -5px;
+}
+.ce-image-resizer-container > .bl {
+  cursor: sw-resize;
+  bottom: -5px;
+  left: -5px;
+}
+.ce-image-resizer-container > .b {
+  cursor: s-resize;
+  bottom: -5px;
+  left: 50%;
+}
+.ce-image-resizer-container > .br {
+  cursor: se-resize;
+  bottom: -5px;
+  right: -5px;
+}
+
+iframe {
+  overflow: clip !important;
 }
 
 table {
