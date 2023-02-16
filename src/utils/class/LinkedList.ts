@@ -17,6 +17,9 @@ class LinkedList<T> {
   getPrev() {
     return this.prev;
   }
+  isRoot() {
+    return this.prev === null;
+  }
 }
 
 export default LinkedList;

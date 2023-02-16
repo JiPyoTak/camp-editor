@@ -1,11 +1,12 @@
 import {
-  getCopiedLineInfo,
+  clearLine,
   getEditorLines,
   getRelativePosition,
   isWrappedInTag,
-  wrapLines,
+  wrapLine,
 } from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
+import Lines from '@/utils/class/Lines';
 import { CampCommand, CampFormatCommand, CampSubmenuCommand } from '@/types';
 
 // Controller: 이벤트 실행
@@ -16,7 +17,7 @@ class EditorController {
     this.$root = $root;
   }
 
-  execCommand<T extends Event>(command: CampCommand, event: T) {
+  execCommand<T extends Event>(command: CampCommand, event?: T) {
     // TODO: 많아지면 리팩토링 생각해보기
     switch (command) {
       case 'bold':
@@ -97,28 +98,36 @@ class EditorController {
 
     // TODO : Text Container 가 start === end 일 때
     if (existTag) {
-      const lineInfos = $lines.map(($l) => getCopiedLineInfo($l, range));
+      // TODO: 태그 삭제하는 기능
+      const copiedLines = new Lines($lines, range);
 
-      const {
-        $lines: $copiedLines,
-        $startContainer,
-        $endContainer,
-      } = wrapLines(lineInfos, tagName);
-
-      for (let i = 0; i < $copiedLines.length; i++) {
-        $textarea.replaceChild($copiedLines[i], $lines[i]);
+      copiedLines.forEachRange((...props) => {
+        const [[$copiedLine], i] = props;
+        clearLine(tagName, ...props[0]);
+        $textarea.replaceChild($copiedLine, $lines[i]);
+      });
+    } else {
+      const copiedLines = new Lines($lines, range);
+      const { $from, fromOffset, $to, toOffset } = copiedLines;
+      if (!$from || !$to) {
+        throw new Error('Wrapping Lines : Invalid Range information');
       }
+
+      copiedLines.forEachRange((...props) => {
+        const [[$copiedLine], i] = props;
+        wrapLine(tagName, ...props[0]);
+        $textarea.replaceChild($copiedLine, $lines[i]);
+      });
 
       const newRange = new Range();
 
-      newRange.setStartBefore($startContainer);
-      newRange.setEndAfter($endContainer);
+      newRange.setStart($from, fromOffset);
+      newRange.setEnd($to, toOffset);
 
       selection.removeAllRanges();
       selection.addRange(newRange);
     }
   }
-  // TODO: 태그 삭제하는 기능
 }
 
 export { EditorController };
