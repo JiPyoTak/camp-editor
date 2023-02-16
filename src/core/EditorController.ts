@@ -1,4 +1,9 @@
-import { getEditorLines, isWrappedInTag, wrapLine } from '@/utils/dom';
+import {
+  clearLine,
+  getEditorLines,
+  isWrappedInTag,
+  wrapLine,
+} from '@/utils/dom';
 import { COMMAND_INFO } from '@/constants/command';
 import type { CampCommand } from '@/types';
 import Lines from '@/utils/class/Lines';
@@ -60,6 +65,15 @@ class EditorController {
 
     // TODO : Text Container 가 start === end 일 때
     if (existTag) {
+      // TODO: 태그 삭제하는 기능
+      const copiedLines = new Lines($lines, range);
+
+      copiedLines.forEachRange((...props) => {
+        const [[$copiedLine], i] = props;
+        clearLine(tagName, ...props[0]);
+        $textarea.replaceChild($copiedLine, $lines[i]);
+      });
+    } else {
       const copiedLines = new Lines($lines, range);
       const { $from, fromOffset, $to, toOffset } = copiedLines;
       if (!$from || !$to) {
@@ -79,8 +93,6 @@ class EditorController {
 
       selection.removeAllRanges();
       selection.addRange(newRange);
-    } else {
-      // TODO: 태그 삭제하는 기능
     }
   }
 }

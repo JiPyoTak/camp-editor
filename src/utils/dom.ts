@@ -1,5 +1,3 @@
-import type Lines from '@/utils/class/Lines';
-
 /**
  * Provide closest with custom function
  * @param compareFunction - (target) => boolean
@@ -171,4 +169,36 @@ export function wrapLine(
     $line.removeChild($child);
     $wrapper.appendChild($child);
   });
+}
+
+export function clearLine(
+  tagName: string,
+  $line: Node,
+  startIndex: number,
+  endIndex: number,
+) {
+  const $childNodes = $line.childNodes;
+
+  const stack: Node[] = Array.prototype.slice.call(
+    $childNodes,
+    startIndex,
+    endIndex,
+  );
+
+  while (stack.length !== 0) {
+    const $node = stack.pop();
+    if (!$node) continue;
+    const $childNodes = $node.childNodes as NodeListOf<Node>;
+    stack.push(...Array.from($childNodes));
+
+    if ($node.nodeName.toLowerCase() === tagName.toLowerCase()) {
+      const $parentNode = $node.parentNode!;
+
+      $childNodes.forEach(($child) => {
+        $parentNode.insertBefore($child, $node);
+      });
+
+      $parentNode.removeChild($node);
+    }
+  }
 }
